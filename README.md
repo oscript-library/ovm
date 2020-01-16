@@ -1,9 +1,9 @@
 # OneScript Version Manager
 
-[![Release](https://img.shields.io/github/release/silverbulleters/ovm/all.svg)](https://github.com/silverbulleters/ovm/releases)
-[![Build Status](https://travis-ci.org/silverbulleters/ovm.svg?branch=develop)](https://travis-ci.org/silverbulleters/ovm)
-[![Quality Gate](https://opensonar.silverbulleters.org/api/project_badges/measure?project=ovm&metric=alert_status)](https://opensonar.silverbulleters.org/dashboard?id=ovm)
-[![Tech Debt](https://opensonar.silverbulleters.org/api/project_badges/measure?project=ovm&metric=sqale_index)](https://opensonar.silverbulleters.org/dashboard?id=ovm)
+[![Release](https://img.shields.io/github/release/oscript-library/ovm/all.svg)](https://github.com/oscript-library/ovm/releases)
+[![Build Status](https://travis-ci.org/oscript-library/ovm.svg?branch=develop)](https://travis-ci.org/oscript-library/ovm)
+[![Quality Gate](https://sonar.openbsl.ru/api/project_badges/measure?project=ovm&metric=alert_status)](https://sonar.openbsl.ru/dashboard?id=ovm)
+[![Tech Debt](https://sonar.openbsl.ru/api/project_badges/measure?project=ovm&metric=sqale_index)](https://sonar.openbsl.ru/dashboard?id=ovm)
 
 ## Цель
 
@@ -20,12 +20,12 @@ ovm - утилита, предназначенная для установки, 
 
 ### Windows
 
-* Скачать `ovm.exe` со страницы [страницы релизов GitHub](https://github.com/silverbulleters/ovm/releases)
+* Скачать `ovm.exe` со страницы [страницы релизов GitHub](https://github.com/oscript-library/ovm/releases)
 * По желанию прописать путь к ovm.exe в переменной окружения `PATH`
 
 ### Linux
 
-* Скачать `ovm.exe` со страницы [страницы релизов GitHub](https://github.com/silverbulleters/ovm/releases)
+* Скачать `ovm.exe` со страницы [страницы релизов GitHub](https://github.com/oscript-library/ovm/releases)
 * Для быстрого использования приложения можно создать sh-файл со следующим содержанием:
 
 ```sh
