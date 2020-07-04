@@ -17,10 +17,7 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    
-    - name: temp
-      run: echo $PATH
-    
+  
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
 
@@ -43,15 +40,17 @@ jobs:
     - name: Patch 1bdd
       run: patch oscript_modules/1bdd/features/lib/step_definitions/ВыполнениеКоманд.os 1bdd.patch
 
+    - name: Create ~/bin
+      run: |
+        mkdir -p ~/bin
+        echo "::add-path::~/bin"
+
     - name: Make ovm
       run: |
         oscript -make src/cmd/ovm.os ovm.exe
         echo -e "#!/bin/sh\nmono ./ovm.exe \"\$@\"" > ~/bin/ovm
         chmod +x ~/bin/ovm
         ovm
-    # Runs a single command using the runners shell
-    - name: Run a one-line script
-      run: echo Hello, world!
     
     - name: Run tests
       run: oscript tasks/coverage.os
