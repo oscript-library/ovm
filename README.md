@@ -162,6 +162,8 @@ C:\Users\NikitaGryzlov\AppData\Local\ovm\1.0.19\bin\oscript.exe # Путь к 1.
 C:\Users\NikitaGryzlov\AppData\Local\ovm\current\bin\oscript.exe
 ```
 
+### Получение пути к исполняемому файлу oscript
+
 ```sh
 $ ovm which 1.0.19
 
