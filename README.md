@@ -170,6 +170,22 @@ $ ovm which 1.0.19
 C:\Users\NikitaGryzlov\AppData\Local\ovm\1.0.19\bin\oscript.exe
 ```
 
+### Отладка скриптов, запускаемых через OVM, в VSCode
+
+После первичной настройки OVM в каталоге вашего проекта нужно штатно настроить отладчик 1скрипт
+
+Далее нужно добавить\изменить файл `.vscode/launch.json`
+
+В разделе `configurations` файла нужно добавить\установить следующие строки
+```json
+  "windows": {
+     "runtimeExecutable": "${env:OVM_OSCRIPTBIN}\\oscript.exe"
+  },
+  "linux": {
+    "runtimeExecutable": "${env:OVM_OSCRIPTBIN}/oscript"
+  }
+```
+
 ## Конфигурирование ovm
 
 ovm имеет несколько конфигурационных параметров, управляющих его поведением. Эти параметры можно задать с помощью команды `config`
