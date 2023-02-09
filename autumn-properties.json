@@ -1,0 +1,21 @@
+{
+    "cli": {
+        "ИмяПриложения": "ovm",
+        "ПолноеИмяПриложения": "OneScript Version Manager v%{cli.ВерсияПриложения}",
+        "ВерсияПриложения": "1.0.0-RC17"
+    },
+    "logos": {
+        "logger": {
+            "oscript.app.ovm": {
+                "level": "INFO",
+                "appenders": "logos"
+            }
+        },
+        "appender": {
+            "logos": {
+                "type": "ЛогосАппендер",
+                "level": "INFO"
+            }
+        }
+    }
+}
