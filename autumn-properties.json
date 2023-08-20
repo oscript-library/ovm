@@ -1,0 +1,17 @@
+{
+    "logos": {
+        "logger": {
+            "oscript.app.ovm": {
+                "level": "INFO",
+                "appenders": "logos",
+                "classlayout": "РаскладкаЛогOVM"
+            }
+        },
+        "appender": {
+            "logos": {
+                "type": "АппендерЛогOVM",
+                "level": "INFO"
+            }
+        }
+    }
+}
