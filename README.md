@@ -86,7 +86,7 @@ export $HOME/.local/share/ovm/current/bin:$PATH
 
 Для `ConEmu` активация производится через `Settings` -> `Startup` -> `Environment`. В метод установки PATH необходимо добавить путь к %OVM_OSCRIPTBIN% перед текущим `%PATH%`. Например, `set PATH=%OVM_OSCRIPTBIN%;%PATH%`
 
-Современные версии `Cmder` для Windows автоматически подхватывают переменные среды и переопределение автозапуска в реестре (см. <a href="use_cmd">Активация в cmd</a>)
+Современные версии `Cmder` для Windows автоматически подхватывают переменные среды и переопределение автозапуска в реестре (см. <a href="#cmd-windows">Активация в cmd</a>)
 
 ## Использование
 
@@ -168,6 +168,22 @@ C:\Users\NikitaGryzlov\AppData\Local\ovm\current\bin\oscript.exe
 $ ovm which 1.0.19
 
 C:\Users\NikitaGryzlov\AppData\Local\ovm\1.0.19\bin\oscript.exe
+```
+
+### Отладка скриптов, запускаемых через OVM, в VSCode
+
+После первичной настройки OVM в каталоге вашего проекта нужно штатно настроить отладчик 1скрипт
+
+Далее нужно добавить\изменить файл `.vscode/launch.json`
+
+В разделе `configurations` файла нужно добавить\установить следующие строки
+```json
+  "windows": {
+     "runtimeExecutable": "${env:OVM_OSCRIPTBIN}\\oscript.exe"
+  },
+  "linux": {
+    "runtimeExecutable": "${env:OVM_OSCRIPTBIN}/oscript"
+  }
 ```
 
 ## Конфигурирование ovm
