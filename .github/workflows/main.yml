@@ -27,7 +27,7 @@ jobs:
       uses: otymko/setup-onescript@v1.0
       with:
         # Version of Onescript to use. Support value: 1.0.21, 1.2.0, 1.3.0, dev
-        version: dev
+        version: "1.8.4"
 
     - name: Install deps
       run: |
