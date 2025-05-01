@@ -18,6 +18,9 @@ jobs:
         with:
           version: 1.9.2
 
+      - name: Update opm
+        run: opm install opm@1.3.0
+
       - name: Install local dependencies
         run: opm install -l
 
