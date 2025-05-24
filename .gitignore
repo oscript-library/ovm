@@ -1,4 +1,5 @@
 
+.vscode/launch.json
 oscript_modules/
 
 src/cmd/oscript\.cfg
