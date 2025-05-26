@@ -1,0 +1,23 @@
+name: Тестирование
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - oscript_version: 'default'
+            test_engiene: '1testrunner'
+          - oscript_version: 'stable'
+            test_engiene: '1testrunner'
+          - oscript_version: 'dev'
+            test_engiene: 'oneunit'
+    uses: autumn-library/workflows/.github/workflows/test.yml@oneunit
+    with:
+      oscript_version: ${{ matrix.oscript_version }}
+      test_engine: ${{ matrix.test_engiene }}
