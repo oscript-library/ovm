@@ -12,14 +12,14 @@
     
 Сценарий: Установка движка с сохранением библиотек
     Допустим Я удаляю каталог "./temp/ovm"
-    И Я выполняю команду "ovm install stable"
+    И Я выполняю команду "oscript ./src/cmd/ovm.os install stable"
     И Я создаю каталог "my_lib" в подкаталоге "temp/ovm/stable/lib" рабочего каталога
-    Когда Я выполняю команду "ovm install stable"
+    Когда Я выполняю команду "oscript ./src/cmd/ovm.os install stable"
     Тогда В подкаталоге "temp/ovm/stable/lib" рабочего каталога существует каталог "my_lib"
 
 Сценарий: Установка движка с удалением библиотек
     Допустим Я удаляю каталог "./temp/ovm"
-    И Я выполняю команду "ovm install stable"
+    И Я выполняю команду "oscript ./src/cmd/ovm.os install stable"
     И Я создаю каталог "my_lib" в подкаталоге "temp/ovm/stable/lib" рабочего каталога
-    Когда Я выполняю команду "ovm install --clean stable"
+    Когда Я выполняю команду "oscript ./src/cmd/ovm.os install --clean stable"
     Тогда Каталог "./temp/ovm/stable/lib/my_lib" не существует
