@@ -11,14 +11,14 @@
     
 Сценарий: Установка версии с алиасом
     Допустим Я удаляю каталог "./temp/ovm"
-    Когда Я выполняю команду "ovm install --name test_stable stable"
+    Когда Я выполняю команду "oscript ./src/cmd/ovm.os install --name test_stable stable"
     И я вижу в консоли вывод "Установка OneScript stable завершена"
     И я вижу в консоли вывод "ovm use test_stable"
 
-    Когда Я выполняю команду "ovm ls"
+    Когда Я выполняю команду "oscript ./src/cmd/ovm.os ls"
     Тогда я вижу в консоли строку подобно "^test_stable -> .*"
     И я не вижу в консоли строку подобно "^stable -> .*"
 
 Сценарий: Использование версии
-    Когда Я выполняю команду "ovm use test_stable"
+    Когда Я выполняю команду "oscript ./src/cmd/ovm.os use test_stable"
     Тогда я вижу в консоли вывод "OneScript test_stable активирован"
