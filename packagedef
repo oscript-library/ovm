@@ -1,5 +1,5 @@
 Описание.Имя("ovm")
-	.Версия("1.6.0")
+	.Версия("1.6.1")
 	.Автор("Nikita Fedkin")
 	.АдресАвтора("nixel2007@gmail.com")
 	.Описание("OneScript Version Manager")
