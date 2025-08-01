@@ -226,7 +226,7 @@
 		"profile.ps1"
 	);
 	
-	ТекстВычислениеPATH = "set PATH=$OVM_OSCRIPTBIN;$PATH";
+	ТекстВычислениеPATH = "$env:PATH=$env:OVM_OSCRIPTBIN+";"+$env:PATH";
 	ДобавитьТекстВНовыйИлиИмеющийсяФайл(ТекстВычислениеPATH, ПутьКФайлу);
 	
 КонецПроцедуры
