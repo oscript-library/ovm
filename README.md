@@ -57,7 +57,7 @@ set PATH=%OVM_OSCRIPTBIN%;%PATH%
 создается файл (либо добавляется в существующий) по адресу `%USERPROFILE%\Documents\WindowsPowerShell\profile.ps1` со следующим содержанием:
 
 ```powershell
-set PATH=$OVM_OSCRIPTBIN;$PATH
+$env:PATH=$env:OVM_OSCRIPTBIN+";"+$env:PATH
 ```
 
 ### sh (*nix)
