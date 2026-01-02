@@ -1,0 +1,18 @@
+# С тестированием OneUnit
+name: Контроль качества
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  sonar:
+    uses: autumn-library/workflows/.github/workflows/sonar.yml@main
+    with:
+      coveralls: true
+      github_repository: oscript-library/ovm
+      oscript_version: 'dev'
+      test_engine: 'oneunit'
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
