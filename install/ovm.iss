@@ -51,6 +51,10 @@ var
   ParamExpanded: string;
 begin
   ParamExpanded := ExpandConstant(Param);
+  // Normalize: remove trailing backslash
+  if (Length(ParamExpanded) > 0) and (ParamExpanded[Length(ParamExpanded)] = '\') then
+    ParamExpanded := Copy(ParamExpanded, 1, Length(ParamExpanded) - 1);
+
   if not RegQueryStringValue(HKEY_CURRENT_USER, EnvironmentKey, 'Path', OrigPath) then
   begin
     Result := True;
@@ -114,6 +118,10 @@ begin
   if CurUninstallStep = usPostUninstall then
   begin
     AppPath := ExpandConstant('{app}');
+    // Normalize: remove trailing backslash
+    if (Length(AppPath) > 0) and (AppPath[Length(AppPath)] = '\') then
+      AppPath := Copy(AppPath, 1, Length(AppPath) - 1);
+
     if RegQueryStringValue(HKEY_CURRENT_USER, EnvironmentKey, 'Path', OrigPath) then
     begin
       PathList := TStringList.Create;
@@ -136,7 +144,7 @@ begin
           end;
           
           // Normalize by removing trailing backslash for comparison
-          if PathItem[Length(PathItem)] = '\' then
+          if (Length(PathItem) > 0) and (PathItem[Length(PathItem)] = '\') then
             PathItem := Copy(PathItem, 1, Length(PathItem) - 1);
             
           if Uppercase(PathItem) = Uppercase(AppPath) then
