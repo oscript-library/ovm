@@ -28,7 +28,7 @@ Compression=lzma
 SolidCompression=yes
 ; Per-user installation (no admin rights required)
 PrivilegesRequired=lowest
-PrivilegesRequiredOverridesAllowed=dialog
+PrivilegesRequiredOverridesAllowed=commandline
 ; Notify Windows about environment changes
 ChangesEnvironment=yes
 ArchitecturesInstallIn64BitMode=x64
@@ -77,7 +77,7 @@ begin
     begin
       if RegQueryStringValue(HKEY_CURRENT_USER, EnvironmentKey, 'Path', OrigPath) then
       begin
-        // Remove trailing backslash if present
+        // Add semicolon separator if PATH doesn't already end with one
         if (Length(OrigPath) > 0) and (OrigPath[Length(OrigPath)] = ';') then
           NewPath := OrigPath + AppPath
         else
@@ -108,6 +108,7 @@ var
   NewPath: string;
   AppPath: string;
   PathList: TStringList;
+  PathItem: string;
   i: Integer;
 begin
   if CurUninstallStep = usPostUninstall then
@@ -121,13 +122,27 @@ begin
         PathList.StrictDelimiter := True;
         PathList.DelimitedText := OrigPath;
         
-        // Remove our path from the list
+        // Remove our path from the list (both with and without trailing backslash)
+        // Also remove empty entries to avoid ";;" in PATH
         for i := PathList.Count - 1 downto 0 do
         begin
-          if Uppercase(PathList[i]) = Uppercase(AppPath) then
+          PathItem := PathList[i];
+          
+          // Remove empty entries
+          if Trim(PathItem) = '' then
           begin
             PathList.Delete(i);
-            Log('Removed from PATH: ' + AppPath);
+            Continue;
+          end;
+          
+          // Normalize by removing trailing backslash for comparison
+          if PathItem[Length(PathItem)] = '\' then
+            PathItem := Copy(PathItem, 1, Length(PathItem) - 1);
+            
+          if Uppercase(PathItem) = Uppercase(AppPath) then
+          begin
+            Log('Removed from PATH: ' + PathList[i]);
+            PathList.Delete(i);
           end;
         end;
         
