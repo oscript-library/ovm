@@ -35,7 +35,9 @@ jobs:
           echo "Extracted version: $VERSION"
 
       - name: Create dist directory
-        run: mkdir -p dist
+        run: |
+          mkdir -p dist
+          chmod 777 dist
 
       - name: Build Windows installer with Inno Setup
         run: |
