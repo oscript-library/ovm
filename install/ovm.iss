@@ -65,7 +65,7 @@ begin
   Result := Pos(';' + Uppercase(ParamExpanded) + ';', ';' + Uppercase(OrigPath) + ';') = 0;
   // Also check with trailing backslash variant
   if Result = True then
-     Result := Pos(';' + Uppercase(ParamExpanded) + '\' + ';', ';' + Uppercase(OrigPath) + ';') = 0; 
+     Result := Pos(';' + Uppercase(ParamExpanded) + '\' + ';', ';' + Uppercase(OrigPath) + ';') = 0;
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
