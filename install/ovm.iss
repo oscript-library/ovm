@@ -45,121 +45,190 @@ Source: "..\ovm.exe"; DestDir: "{app}"; Flags: ignoreversion
 const
   EnvironmentKey = 'Environment';
 
-function NeedsAddPath(Param: string): boolean;
-var
-  OrigPath: string;
-  ParamExpanded: string;
+// Удаляет завершающий обратный слеш из пути, если он есть
+function NormalizePath(Path: string): string;
 begin
-  ParamExpanded := ExpandConstant(Param);
-  // Normalize: remove trailing backslash
-  if (Length(ParamExpanded) > 0) and (ParamExpanded[Length(ParamExpanded)] = '\') then
-    ParamExpanded := Copy(ParamExpanded, 1, Length(ParamExpanded) - 1);
+  Result := Path;
+  if (Length(Result) > 0) and (Result[Length(Result)] = '\') then
+    Result := Copy(Result, 1, Length(Result) - 1);
+end;
 
-  if not RegQueryStringValue(HKEY_CURRENT_USER, EnvironmentKey, 'Path', OrigPath) then
+// Проверяет, существует ли путь в переменной PATH
+// Учитывает варианты с завершающим слешем и без него
+function PathExistsInEnv(Path: string): Boolean;
+var
+  EnvPath: string;
+  NormalizedPath: string;
+  SearchIn: string;
+begin
+  Result := False;
+  
+  // Нормализуем ВХОДНОЙ путь для единообразия
+  NormalizedPath := NormalizePath(Path);
+  
+  // Получаем PATH из реестра (НЕ нормализуем — там могут быть пути с backslash)
+  if not RegQueryStringValue(HKEY_CURRENT_USER, EnvironmentKey, 'Path', EnvPath) then
+    exit;
+  
+  // Добавляем разделители по краям для корректного поиска подстроки
+  SearchIn := ';' + Uppercase(EnvPath) + ';';
+  
+  // Ищем путь в EnvPath в двух вариантах:
+  // 1. Без trailing backslash (C:\MyApp)
+  // 2. С trailing backslash (C:\MyApp\) — на случай, если так записано в реестре
+  if Pos(';' + Uppercase(NormalizedPath) + ';', SearchIn) > 0 then
+    Result := True
+  else if Pos(';' + Uppercase(NormalizedPath) + '\;', SearchIn) > 0 then
+    Result := True;
+end;
+
+// Добавляет путь в переменную окружения PATH
+// Возвращает True при успешном добавлении
+function AddToPath(Path: string): Boolean;
+var
+  EnvPath: string;
+  NewPath: string;
+  NormalizedPath: string;
+begin
+  Result := False;
+  NormalizedPath := NormalizePath(Path);
+  
+  // Проверяем, есть ли путь уже в PATH
+  if PathExistsInEnv(NormalizedPath) then
   begin
+    Log('Путь уже существует в PATH: ' + NormalizedPath);
     Result := True;
     exit;
   end;
-  // Check if our path already exists in PATH (case insensitive)
-  // Check without trailing backslash
-  Result := Pos(';' + Uppercase(ParamExpanded) + ';', ';' + Uppercase(OrigPath) + ';') = 0;
-  // Also check with trailing backslash variant
-  if Result = True then
-     Result := Pos(';' + Uppercase(ParamExpanded) + '\' + ';', ';' + Uppercase(OrigPath) + ';') = 0; 
+  
+  // Получаем текущее значение PATH
+  if RegQueryStringValue(HKEY_CURRENT_USER, EnvironmentKey, 'Path', EnvPath) then
+  begin
+    // Добавляем разделитель, если PATH не заканчивается на него
+    if Length(EnvPath) = 0 then
+      NewPath := NormalizedPath
+    else if EnvPath[Length(EnvPath)] = ';' then
+      NewPath := EnvPath + NormalizedPath
+    else
+      NewPath := EnvPath + ';' + NormalizedPath;
+  end
+  else
+  begin
+    // PATH не существует, создаём новый
+    NewPath := NormalizedPath;
+  end;
+  
+  // Записываем обновлённый PATH в реестр
+  if RegWriteStringValue(HKEY_CURRENT_USER, EnvironmentKey, 'Path', NewPath) then
+  begin
+    Log('Добавлено в PATH: ' + NormalizedPath);
+    Result := True;
+  end
+  else
+    Log('Ошибка при добавлении в PATH: ' + NormalizedPath);
+end;
+
+// Удаляет путь из переменной окружения PATH
+// Использует TStringList для парсинга и ручную сборку строки для записи,
+// чтобы избежать проблемы с кавычками вокруг путей с пробелами
+function RemoveFromPath(Path: string): Boolean;
+var
+  EnvPath: string;
+  NewPath: string;
+  NormalizedPath: string;
+  PathList: TStringList;
+  PathItem: string;
+  NormalizedItem: string;
+  i: Integer;
+  Removed: Boolean;
+begin
+  Result := False;
+  Removed := False;
+  NormalizedPath := NormalizePath(Path);
+  
+  // Получаем текущее значение PATH
+  if not RegQueryStringValue(HKEY_CURRENT_USER, EnvironmentKey, 'Path', EnvPath) then
+  begin
+    Log('PATH не найден в реестре');
+    exit;
+  end;
+  
+  PathList := TStringList.Create;
+  try
+    // Разбираем PATH на элементы
+    PathList.Delimiter := ';';
+    PathList.StrictDelimiter := True;
+    PathList.DelimitedText := EnvPath;
+    
+    // Удаляем наш путь и пустые элементы
+    for i := PathList.Count - 1 downto 0 do
+    begin
+      PathItem := PathList[i];
+      
+      // Удаляем пустые элементы (защита от ";;" в PATH)
+      if Trim(PathItem) = '' then
+      begin
+        PathList.Delete(i);
+        Continue;
+      end;
+      
+      // Нормализуем для сравнения (убираем завершающий слеш)
+      NormalizedItem := NormalizePath(PathItem);
+      
+      // Сравниваем без учёта регистра
+      if Uppercase(NormalizedItem) = Uppercase(NormalizedPath) then
+      begin
+        Log('Удалено из PATH: ' + PathItem);
+        PathList.Delete(i);
+        Removed := True;
+      end;
+    end;
+    
+    // Собираем строку вручную, чтобы избежать добавления кавычек
+    // (TStringList.DelimitedText добавляет кавычки к путям с пробелами)
+    NewPath := '';
+    for i := 0 to PathList.Count - 1 do
+    begin
+      if i > 0 then
+        NewPath := NewPath + ';';
+      NewPath := NewPath + PathList[i];
+    end;
+    
+    // Записываем обновлённый PATH в реестр
+    if RegWriteStringValue(HKEY_CURRENT_USER, EnvironmentKey, 'Path', NewPath) then
+    begin
+      if Removed then
+        Log('PATH успешно обновлён')
+      else
+        Log('Путь не найден в PATH: ' + NormalizedPath);
+      Result := True;
+    end
+    else
+      Log('Ошибка при обновлении PATH');
+  finally
+    PathList.Free;
+  end;
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
 var
-  OrigPath: string;
-  NewPath: string;
   AppPath: string;
 begin
   if CurStep = ssPostInstall then
   begin
     AppPath := ExpandConstant('{app}');
-    if NeedsAddPath(AppPath) then
-    begin
-      if RegQueryStringValue(HKEY_CURRENT_USER, EnvironmentKey, 'Path', OrigPath) then
-      begin
-        // Add semicolon separator if PATH doesn't already end with one
-        if (Length(OrigPath) > 0) and (OrigPath[Length(OrigPath)] = ';') then
-          NewPath := OrigPath + AppPath
-        else
-          NewPath := OrigPath + ';' + AppPath;
-        
-        if RegWriteStringValue(HKEY_CURRENT_USER, EnvironmentKey, 'Path', NewPath) then
-          Log('Added to PATH: ' + AppPath)
-        else
-          Log('Failed to add to PATH');
-      end
-      else
-      begin
-        // PATH doesn't exist, create it
-        if RegWriteStringValue(HKEY_CURRENT_USER, EnvironmentKey, 'Path', AppPath) then
-          Log('Created PATH with: ' + AppPath)
-        else
-          Log('Failed to create PATH');
-      end;
-    end
-    else
-      Log('Path already in PATH, skipping');
+    AddToPath(AppPath);
   end;
 end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 var
-  OrigPath: string;
-  NewPath: string;
   AppPath: string;
-  PathList: TStringList;
-  PathItem: string;
-  i: Integer;
 begin
   if CurUninstallStep = usPostUninstall then
   begin
     AppPath := ExpandConstant('{app}');
-    // Normalize: remove trailing backslash
-    if (Length(AppPath) > 0) and (AppPath[Length(AppPath)] = '\') then
-      AppPath := Copy(AppPath, 1, Length(AppPath) - 1);
-
-    if RegQueryStringValue(HKEY_CURRENT_USER, EnvironmentKey, 'Path', OrigPath) then
-    begin
-      PathList := TStringList.Create;
-      try
-        PathList.Delimiter := ';';
-        PathList.StrictDelimiter := True;
-        PathList.DelimitedText := OrigPath;
-        
-        // Remove our path from the list (both with and without trailing backslash)
-        // Also remove empty entries to avoid ";;" in PATH
-        for i := PathList.Count - 1 downto 0 do
-        begin
-          PathItem := PathList[i];
-          
-          // Remove empty entries
-          if Trim(PathItem) = '' then
-          begin
-            PathList.Delete(i);
-            Continue;
-          end;
-          
-          // Normalize by removing trailing backslash for comparison
-          if (Length(PathItem) > 0) and (PathItem[Length(PathItem)] = '\') then
-            PathItem := Copy(PathItem, 1, Length(PathItem) - 1);
-            
-          if Uppercase(PathItem) = Uppercase(AppPath) then
-          begin
-            Log('Removed from PATH: ' + PathList[i]);
-            PathList.Delete(i);
-          end;
-        end;
-        
-        NewPath := PathList.DelimitedText;
-        RegWriteStringValue(HKEY_CURRENT_USER, EnvironmentKey, 'Path', NewPath);
-      finally
-        PathList.Free;
-      end;
-    end;
+    RemoveFromPath(AppPath);
   end;
 end;
 
