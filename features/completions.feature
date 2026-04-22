@@ -19,6 +19,14 @@
     Тогда я вижу в консоли вывод "_ovm_completions"
     И я вижу в консоли вывод "complete -F _ovm_completions ovm"
 
-Сценарий: Ошибка при указании неподдерживаемой оболочки
+Сценарий: Генерация completions для zsh
     Когда Я выполняю команду "oscript ./src/cmd/ovm.os completions --shell zsh"
+    Тогда я вижу в консоли вывод "#compdef ovm"
+
+Сценарий: Генерация completions для pwsh
+    Когда Я выполняю команду "oscript ./src/cmd/ovm.os completions --shell pwsh"
+    Тогда я вижу в консоли вывод "Register-ArgumentCompleter"
+
+Сценарий: Ошибка при указании неподдерживаемой оболочки
+    Когда Я выполняю команду "oscript ./src/cmd/ovm.os completions --shell fish"
     Тогда я вижу в консоли вывод "не поддерживается"
