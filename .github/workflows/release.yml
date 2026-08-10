@@ -27,8 +27,36 @@ jobs:
       - name: Build ovm.exe
         run: oscript -make src/cmd/ovm.os ovm.exe
 
-      - name: Upload ovm.exe to release assets
+      - name: Extract version from packagedef
+        id: get_version
+        run: |
+          VERSION=$(grep -oP '\.Версия\("\K[^"]+' packagedef || true)
+          if [ -z "$VERSION" ]; then
+            echo "Error: failed to extract version from packagedef."
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Extracted version: $VERSION"
+
+      - name: Create dist directory
+        run: |
+          mkdir -p dist
+          chmod 777 dist
+
+      - name: Build Windows installer with Inno Setup
+        run: |
+          if [ ! -f "ovm.exe" ]; then
+            echo "Error: ovm.exe not found in workspace root. Ensure the 'Build ovm.exe' step completed successfully."
+            exit 1
+          fi
+          docker run --rm -i -v "$GITHUB_WORKSPACE:/work" -w /work amake/innosetup \
+            /DMyAppVersion="${{ steps.get_version.outputs.version }}" \
+            install/ovm.iss
+
+      - name: Upload release assets
         uses: AButler/upload-release-assets@v2.0.2
         with:
-          files: ovm.exe
+          files: |
+            ovm.exe
+            dist/ovm-setup.exe
           repo-token: ${{ secrets.GITHUB_TOKEN }}
