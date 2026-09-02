@@ -12,7 +12,7 @@ ovm - утилита, предназначенная для установки, 
 ## Пререквизиты
 
 * Установленный `.Net Framework >=4.5.2` либо `Mono >=4.6`
-* Работающий интернет
+* Работающий интернет (доступ к [oscript.io](https://oscript.io), а для установки сборок веток и пул-реквестов - к [build.oscript.io](https://build.oscript.io))
 
 ## Установка
 
@@ -103,6 +103,44 @@ ovm install dev stable 1.0.19 # Установить стабильную, но�
 ovm use --install dev # Активировать ночную сборку и установить, если ее нет
 ```
 
+### Установка сборок с сервера сборок
+
+Помимо релизов с сайта OneScript, ovm умеет ставить сборки веток и пул-реквестов с сервера сборок [build.oscript.io](https://build.oscript.io/job/1Script/). Это удобно, чтобы проверить свою библиотеку с еще не вышедшими изменениями движка.
+
+Версия задается с префиксом `branch:` (ветка) либо `pr:` (пул-реквест):
+
+```sh
+ovm install branch:develop            # Последняя успешная сборка ветки develop
+ovm install branch:feature/my-branch  # Ветка с косой чертой в имени
+ovm install pr:1731                   # Последняя успешная сборка пул-реквеста 1731
+
+ovm use --install pr:1731             # Установить (если ее нет) и активировать сборку пул-реквеста
+```
+
+По умолчанию берется последняя успешная сборка. Конкретную сборку можно указать через решетку:
+
+```sh
+ovm install branch:develop#777 # Сборка №777 ветки develop
+```
+
+Каталогом установки (алиасом) по умолчанию становится имя ветки или пул-реквеста, косая черта заменяется на дефис, номер сборки дописывается через дефис:
+
+|Версия|Алиас|
+|-|-
+|`branch:develop`|`develop`
+|`branch:feature/my-branch`|`feature-my-branch`
+|`pr:1731`|`PR-1731`
+|`branch:develop#777`|`develop-777`
+
+Как и для обычных версий, алиас можно задать явно опцией `--name`:
+
+```sh
+ovm install --name test_pr pr:1731
+ovm use test_pr
+```
+
+Список веток и пул-реквестов, доступных к установке, выводится командой `ovm ls --builds` (см. [Вывод установленных версий OneScript](#вывод-установленных-версий-onescript)).
+
 ### Активация OneScript
 
 Для запуска `oscript` и прочих утилит без указания путей к ним необходимо произвести активацию версии OneScript. При этом в каталоге данных `ovm` создастся специальная символическая ссылка `current`, ведущая на активированную версию.
@@ -133,6 +171,14 @@ $ ovm ls --remote # Вывод версий, доступных к устано�
 
 1.0.19 (http://oscript.io/downloads/archive/1_0_19)
 1.0.18 (http://oscript.io/downloads/archive/1_0_18)
+```
+
+```sh
+$ ovm ls --builds # Вывод сборок веток и пул-реквестов, доступных к установке с сервера сборок
+
+pr:1731 (https://build.oscript.io/job/1Script/job/PR-1731/)
+branch:develop (https://build.oscript.io/job/1Script/job/develop/)
+branch:feature/async (https://build.oscript.io/job/1Script/job/feature%252Fasync/)
 ```
 
 ```sh
@@ -201,6 +247,18 @@ $ ovm config <имя параметра> <значение>
 ```sh
 $ ovm config oscript.server https://internal.oscript.io
 ```
+
+### Настройка сервера сборок
+
+```sh
+$ ovm config build.server https://internal.build.oscript.io
+$ ovm config build.job 1Script
+```
+
+|Параметр|Значение по умолчанию|Пояснение
+|-|-|-
+|build.server|https://build.oscript.io|Адрес сервера сборок (Jenkins), с которого ставятся версии `branch:` и `pr:`
+|build.job|1Script|Имя многоветочного задания сборки OneScript на сервере сборок
 
 ### Настройка прокси-сервера
 
